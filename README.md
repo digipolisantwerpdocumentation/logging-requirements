@@ -6,6 +6,8 @@
   * [Architectuur](#architectuur)
   * [Hoe moet mijn applicatie loggen [WIP]](#hoe-moet-mijn-applicatie-loggen--wip-)
   * [Wat moet mijn applicatie loggen](#wat-moet-mijn-applicatie-loggen)
+    + [Technische informatie](#technische-informatie)
+    + [Functionele/Business informatie](#functionele-business-informatie)
   * [Waar moet mijn applicatie loggen](#waar-moet-mijn-applicatie-loggen)
   * [Wanneer moet mijn applicatie loggen](#wanneer-moet-mijn-applicatie-loggen)
 
@@ -32,6 +34,30 @@ Alle containers in onze **Openshift** Kubernetes clusters en via **Platform 9** 
 
 
 ## Wat moet mijn applicatie loggen
+
+In zekere zin heeft elke applicatie of service de vrijheid om zelf te bepalen wat gelogd moet worden. Individuele noden maken het moeilijk een homogeen beeld te schetsen. Elke applicatie heeft een verschillend volume, verschillende privacy eisen, verschillende business eigenschappen,... Wel configureren we een aantal zaken standaard in de starter-kits, zodat correlatie tussen verschillende services eenvoudig wordt. Applicaties met afwijkende eisen kunnen de configuraties van de starter-kits dan zelf naar wens aanpassen.
+
+### Technische informatie
+
+Technische informatie wordt gelogd om te helpen bij het identificeren van problemen bij tracing en debugging van technische problemen. Bijvoorbeeld:
+
+- [**Stacktraces**] Waarom produceert deze functie een NullPointerException?
+- [**Availability**] Opstart of shutdown informatie van een applicatie
+- [**Errors**] Een container crasht door een non-recoverable error zoals een OutOfMemoryError.
+- [**Debug**] Een developer draait een applicatie in debug mode en produceert zeer fine-grained informatie over de veranderende staat van de applicatie.
+
+Er is een veel hogere nood aan verbositeit, de structuur is moeilijker om vast te leggen en de levensduur is eerder kort. Denk in dagen, maximum weken. Het is dus aan te raden om deze informatie naar een andere index te loggen. Bepaalde zaken zijn ook niet wenselijk in productie (bijvoorbeeld debug informatie).
+
+### Functionele/Business informatie
+
+Functionele informatie wordt gelogd om de lopende acties/transacties/events binnen een applicatie te registreren. Ze geven een historisch hertraceerbaar beeld op de evolutie van de staat van een applicatie. Een applicatie kan bestaan uit meerdere componenten die met elkaar communiceren over het netwerk.
+
+Functionele logs zijn nuttig bij het debuggen van functionele problemen, analyse, audit trails, customer support, security... 
+
+- **[API-calls]** HTTP REST/SOAP API calls vertellen veel over de flow van informatie doorheen het systeem en kunnen gebruikt worden om een goed beeld te krijgen op het gebruik van applicaties (*analyse*). Bijvoorbeeld, op basis van de historiek kunnen er terugkerende periodes van hoog en lage belasting vastgesteld worden. Het geeft ook zichtbaarheid op vlak van *security*. Een hoog aantal 403s? Ook voor *auditing* biedt dit soort logs mogelijkheden. Denk aan “Customer X heeft Service Y Z-maal geraadpleegd”. Een gelogde API request/response biedt ook uitsluitsel bij discussies over communicatie tussen 2 applicaties, aangezien er exact getoond kan worden wat er binnen en buiten is gegaan (*debuggen van functionele problemen*). Customer support ten slotte spreekt voor zich. “Waarom worden mijn facturen niet getoond op de web interface?”
+- **[Asynchrone Messaging Events]** Business flows verspreiden zich (mede dankzij microservices) steeds vaker over meerdere applicaties. Om broosheid van het geheel te vermijden (wat als 1 schakel in de ketting ontbreekt?) wordt er vaak gekozen om deze flows asynchroon te maken. Vooral in gechoreografeerde maar ook in georchestreerde flows leidt dit tot zeer slechte observeerbaarheid van het geheel. Hoe weet de initiator van de flow of het geheel succesvol is afgerond? Logging is hierbij van enorm belang.
+- **[Database queries]** Hoewel een database query vaak verscholen is achter een API CRUD call of getriggerd wordt door een event kan loggen toch helpen bij het onderzoeken van meer low-level problemen. Zoals de vertaling van abstracte interface naar SQL statement.
+- **[Expliciete logging]** Denk aan het applicatief triggeren van logs. Batch verwerking, zware functies,...
 
 ## Waar moet mijn applicatie loggen
 
