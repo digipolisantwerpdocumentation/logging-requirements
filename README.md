@@ -1,6 +1,13 @@
 # Logging guidelines
 
-[TOC]
+- [Logging guidelines](#logging-guidelines)
+  * [Document historiek](#document-historiek)
+  * [Context](#context)
+  * [Architectuur](#architectuur)
+  * [Hoe moet mijn applicatie loggen [WIP]](#hoe-moet-mijn-applicatie-loggen--wip-)
+  * [Wat moet mijn applicatie loggen](#wat-moet-mijn-applicatie-loggen)
+  * [Waar moet mijn applicatie loggen](#waar-moet-mijn-applicatie-loggen)
+  * [Wanneer moet mijn applicatie loggen](#wanneer-moet-mijn-applicatie-loggen)
 
 ## Document historiek
 
