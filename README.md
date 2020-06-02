@@ -8,6 +8,8 @@
   * [Wat moet mijn applicatie loggen](#wat-moet-mijn-applicatie-loggen)
     + [Technische informatie](#technische-informatie)
     + [Functionele/Business informatie](#functionele-business-informatie)
+    + [Structuur](#structuur)
+    + [Log levels](#log-levels)
   * [Waar moet mijn applicatie loggen](#waar-moet-mijn-applicatie-loggen)
   * [Wanneer moet mijn applicatie loggen](#wanneer-moet-mijn-applicatie-loggen)
 
@@ -44,6 +46,7 @@ Technische informatie wordt gelogd om te helpen bij het identificeren van proble
 - [**Stacktraces**] Waarom produceert deze functie een NullPointerException?
 - [**Availability**] Opstart of shutdown informatie van een applicatie
 - [**Errors**] Een container crasht door een non-recoverable error zoals een OutOfMemoryError.
+- **[Database queries]** Hoewel een database query vaak verscholen is achter een API CRUD call of getriggerd wordt door een event kan loggen toch helpen bij het onderzoeken van meer low-level problemen. Zoals de vertaling van abstracte interface naar SQL statement.
 - [**Debug**] Een developer draait een applicatie in debug mode en produceert zeer fine-grained informatie over de veranderende staat van de applicatie.
 
 Er is een veel hogere nood aan verbositeit, de structuur is moeilijker om vast te leggen en de levensduur is eerder kort. Denk in dagen, maximum weken. Het is dus aan te raden om deze informatie naar een andere index te loggen. Bepaalde zaken zijn ook niet wenselijk in productie (bijvoorbeeld debug informatie).
@@ -56,8 +59,63 @@ Functionele logs zijn nuttig bij het debuggen van functionele problemen, analyse
 
 - **[API-calls]** HTTP REST/SOAP API calls vertellen veel over de flow van informatie doorheen het systeem en kunnen gebruikt worden om een goed beeld te krijgen op het gebruik van applicaties (*analyse*). Bijvoorbeeld, op basis van de historiek kunnen er terugkerende periodes van hoog en lage belasting vastgesteld worden. Het geeft ook zichtbaarheid op vlak van *security*. Een hoog aantal 403s? Ook voor *auditing* biedt dit soort logs mogelijkheden. Denk aan “Customer X heeft Service Y Z-maal geraadpleegd”. Een gelogde API request/response biedt ook uitsluitsel bij discussies over communicatie tussen 2 applicaties, aangezien er exact getoond kan worden wat er binnen en buiten is gegaan (*debuggen van functionele problemen*). Customer support ten slotte spreekt voor zich. “Waarom worden mijn facturen niet getoond op de web interface?”
 - **[Asynchrone Messaging Events]** Business flows verspreiden zich (mede dankzij microservices) steeds vaker over meerdere applicaties. Om broosheid van het geheel te vermijden (wat als 1 schakel in de ketting ontbreekt?) wordt er vaak gekozen om deze flows asynchroon te maken. Vooral in gechoreografeerde maar ook in georchestreerde flows leidt dit tot zeer slechte observeerbaarheid van het geheel. Hoe weet de initiator van de flow of het geheel succesvol is afgerond? Logging is hierbij van enorm belang.
-- **[Database queries]** Hoewel een database query vaak verscholen is achter een API CRUD call of getriggerd wordt door een event kan loggen toch helpen bij het onderzoeken van meer low-level problemen. Zoals de vertaling van abstracte interface naar SQL statement.
 - **[Expliciete logging]** Denk aan het applicatief triggeren van logs. Batch verwerking, zware functies,...
+
+### Structuur
+
+Structuur verschilt per onderdeel, maar bevat enkele gemeenschappelijke elementen. Elke log is een valid **JSON** object. 
+
+> Uitbreidingen op de basisstructuur voor **[api-calls](structure/api-call.md), [events](structure/event.md)** en **[technische logs](structure/technical.md)**.
+
+```json
+{
+    "timestamp": "2020-05-29T08:09:34.539Z",
+    "type": "application/technical/privacy",
+    "correlation": {
+        "id": "d80db7ea-fe4c-4df5-afe1-1b675e19921f",
+        "sourceId": "e27ce2ff-4cf1-40e8-8d70-fe6b105e6490",
+        "sourceName": "appName",
+        "instanceId": "8d0e2382-0540-4229-bc6d-8cdc9c2294ab",
+        "instanceName": "appName-instanceName",
+        "userId": "userid",
+        "ipAddress": "194.25.76.122"
+    },
+    "level": "DEBUG/INFO/WARN/ERROR/FATAL/TRACE"
+}
+```
+
+* *Timestamp* ([RFC3339](https://tools.ietf.org/html/rfc3339)) in overeenstemming met [de Digipolis requirements](https://github.com/digipolisantwerpdocumentation/api-requirements#datums-en-timestamps) en [het standaard Elasticsearch format](https://www.elastic.co/blog/considerations-for-timestamps-in-centralized-logging-platforms). De timestamp moet meegestuurd worden vanuit de applicatie uit nauwkeurigheidsoverwegingen. De logging stack kan latency introduceren.
+* *Type* wordt meegegeven bij elk soort log om later in de pipeline eventuele splitsingen te kunnen maken op index en in geval van privacy logs personendata te verwijderen.
+* *Het correlation object* wordt meegegeven om logs over de verschillende services heen te correleren. Formaat en inhoud van het correlation object zoals [voor Digipolis gedefinieerd](https://github.com/digipolisantwerpdocumentation/api-design-and-patterns/blob/master/patterns/correlation.md).
+* log *level*s worden meegegeven om eenvoudig te kunnen filteren en prioriteren (bijvoorbeeld alerts).
+
+### Log levels
+
+De standaard geaccepteerde log levels over de general-purpose languages heen zijn DEBUG, INFO, WARN, ERROR, FATAL en TRACE. In development omgevingen worden alle log levels naar Elasticsearch gestuurd. In productie valt DEBUG weg.
+
+<u>DEBUG</u>
+
+In alle programmeertalen kan het debug niveau aangezet worden om **meer detail** te verkrijgen over gebeurtenissen in het systeem bij het zoeken naar problemen. Het debug niveau mag standaard niet aanstaan, omdat het volume te hoog is. In productie worden deze logs ook niet opgenomen in Elasticsearch.
+
+<u>INFO</u>
+
+De meeste logs zullen geproduceerd worden op het info niveau. Ze geven blijk van een **state change** binnen de applicatie. [Voorbeelden te vinden onder functionele/business informatie](#functionelebusiness-informatie).
+
+<u>WARN</u>
+
+Het warn niveau kan gebruikt worden om fouten te loggen die **geen impact op de gebruiker** hebben. Bijvoorbeeld, een aantal automatische retries zijn nodig om connectie te krijgen op een API call.
+
+<u>ERROR</u>
+
+Logs op error niveau worden aangemaakt voor herstelbare fouten die de applicatie **niet** doen crashen, maar **wel impact** hebben op de gebruiker. Bijvoorbeeld NullpointerExceptions.
+
+<u>FATAL</u>
+
+Logs op fatal niveau worden geproduceerd wanneer applicaties crashen door **niet-herstelbare fouten**. Bijvoorbeeld een OutOfMemoryError.
+
+<u>TRACE</u>
+
+Het trace niveau kan gebruikt worden wanneer er **tijdelijk nog meer detail** gewenst is dan debug kan bieden. Bijvoorbeeld bij het zoeken naar hardnekkige problemen kan een developer zelf logs injecteren op trace niveau, aan de start en het einde van methodes.
 
 ## Waar moet mijn applicatie loggen
 
