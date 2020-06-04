@@ -5,8 +5,7 @@
 ```json
 {
     "timestamp": "2020-05-29T08:09:34.539Z",
-    "type": "application/technical/privacy",
-    "type?": "request",
+    "type": "application",
     "headers": {
         "key": "value",
         "key2": "value2"
@@ -34,8 +33,7 @@
 ```json
 {
     "timestamp": "2020-05-29T08:09:34.539Z",
-    "type": "application/technical/privacy",
-    "type?": "response",
+    "type": "application",
     "headers": {
         "key": "value",
         "key2": "value2"
@@ -57,3 +55,10 @@
 }
 ```
 
+Het eerste noemenswaardige veld voor API-call logs is de *header-key*. Hierin bevinden zich enkel de headers die belangrijk zijn om context te scheppen voor de uitgevoerde call. Zaken als API keys en andere **confidientiële headers moeten weggelaten worden**.
+
+*Payload* van zowel request als response kan **optioneel** meegegeven worden. Dit wordt standaard niet gedaan omwille van GDPR en resource overwegingen. Wanneer de status in de **4XX** range zit wordt de body mee gelogd om support en debuggen eenvoudiger te maken.
+
+*duration* weergegeven in **milliseconden** (ms).
+
+*log-level* is altijd info, dit in overeenstemming met de regel. info-logs geven blijk van een **state change** binnen de applicatie.
