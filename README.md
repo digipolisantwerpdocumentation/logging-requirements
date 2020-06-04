@@ -67,6 +67,8 @@ Structuur verschilt per onderdeel, maar bevat enkele gemeenschappelijke elemente
 
 > Uitbreidingen op de basisstructuur voor **[api-calls](structure/api-call.md), [events](structure/event.md)** en **[technische logs](structure/technical.md)**.
 
+<u>*Basisstructuur*</u>
+
 ```json
 {
     "timestamp": "2020-05-29T08:09:34.539Z",
