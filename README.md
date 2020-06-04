@@ -63,7 +63,7 @@ Functionele logs zijn nuttig bij het debuggen van functionele problemen, analyse
 
 ### Structuur
 
-Structuur verschilt per onderdeel, maar bevat enkele gemeenschappelijke elementen. Elke log is een valid **JSON** object. 
+Structuur verschilt per onderdeel, maar bevat enkele gemeenschappelijke elementen. Elke log is een valid **JSON** object.
 
 > Uitbreidingen op de basisstructuur voor **[api-calls](structure/api-call.md), [events](structure/event.md)** en **[technische logs](structure/technical.md)**.
 
@@ -91,11 +91,11 @@ Structuur verschilt per onderdeel, maar bevat enkele gemeenschappelijke elemente
 
 ### Log levels
 
-De standaard geaccepteerde log levels over de general-purpose languages heen zijn DEBUG, INFO, WARN, ERROR, FATAL en TRACE. In development omgevingen worden alle log levels naar Elasticsearch gestuurd. In productie valt DEBUG weg.
+De standaard geaccepteerde log levels over de general-purpose languages heen zijn DEBUG, INFO, WARN, ERROR, FATAL en TRACE. **Het is niet de bedoeling als developer zelf per log een log level te bepalen**. In het overgrote merendeel van de gevallen zal elke general-purpose language dit standaard juist invullen.
 
 <u>DEBUG</u>
 
-In alle programmeertalen kan het debug niveau aangezet worden om **meer detail** te verkrijgen over gebeurtenissen in het systeem bij het zoeken naar problemen. Het debug niveau mag standaard niet aanstaan, omdat het volume te hoog is. In productie worden deze logs ook niet opgenomen in Elasticsearch.
+In alle programmeertalen kan het debug niveau aangezet worden om **meer detail** te verkrijgen over gebeurtenissen in het systeem bij het zoeken naar problemen. Het debug niveau mag standaard niet aanstaan, omdat het volume te hoog is.
 
 <u>INFO</u>
 
