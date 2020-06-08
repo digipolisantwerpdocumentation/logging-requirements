@@ -4,17 +4,16 @@
 {
     "timestamp": "2020-05-29T08:09:34.539Z",
     "type": "application",
-    "correlation": {
-        "id": "d80db7ea-fe4c-4df5-afe1-1b675e19921f",
-        "sourceId": "e27ce2ff-4cf1-40e8-8d70-fe6b105e6490",
-        "sourceName": "appName",
-        "instanceId": "8d0e2382-0540-4229-bc6d-8cdc9c2294ab",
-        "instanceName": "appName-instanceName",
-        "userId": "userid",
-        "ipAddress": "194.25.76.122"
-    },
+    "correlationId": "d80db7ea-fe4c-4df5-afe1-1b675e19921f",
     "payload": { ... },
-    "level": "INFO"
+    "headers": {
+        "key": "value",
+        "key2": "value2"
+    },
+    "level": "INFO",
+    "topic": "topicName"
 }
 ```
 
+De event structuur wordt enkel toegepast op appliacties die rechtstreeks met **Kafka** communiceren. Applicaties die de Digipolis Event Handler gebruiken (die achterliggend RabbitMQ gebruikt) communiceren via API calls en gebruiken daarvoor dus [de API-call structuur](api-call.md).
+*Headers* en *payload* zijn **opt-in** en worden standaard niet gelogd. *Topic* wordt gebruikt om het soort event te **identificeren** (bijvoorbeeld user_logged_in)

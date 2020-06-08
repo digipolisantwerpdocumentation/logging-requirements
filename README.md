@@ -15,10 +15,10 @@
 
 ## Document historiek
 
-| Versie | Auteur               | Datum      | Commit  |
-| ------ | -------------------- | ---------- | ------- |
-| 1.0    | Quinten Scheppermans | 18/05/2020 | Release |
-| -      | -                    | -          | -       |
+| Versie | Auteur               | Datum      | Commit                    |
+| ------ | -------------------- | ---------- | ------------------------- |
+| 1.0    | Quinten Scheppermans | 18/05/2020 | Release                   |
+| 1.1    | Quinten Scheppermans | 08/06/2020 | Aanpassingen logstructuur |
 
 ## Context
 
@@ -73,22 +73,14 @@ Structuur verschilt per onderdeel, maar bevat enkele gemeenschappelijke elemente
 {
     "timestamp": "2020-05-29T08:09:34.539Z",
     "type": "application/technical/privacy",
-    "correlation": {
-        "id": "d80db7ea-fe4c-4df5-afe1-1b675e19921f",
-        "sourceId": "e27ce2ff-4cf1-40e8-8d70-fe6b105e6490",
-        "sourceName": "appName",
-        "instanceId": "8d0e2382-0540-4229-bc6d-8cdc9c2294ab",
-        "instanceName": "appName-instanceName",
-        "userId": "userid",
-        "ipAddress": "194.25.76.122"
-    },
+    "correlationId": "d80db7ea-fe4c-4df5-afe1-1b675e19921f",
     "level": "DEBUG/INFO/WARN/ERROR/FATAL/TRACE"
 }
 ```
 
 * *Timestamp* ([RFC3339](https://tools.ietf.org/html/rfc3339)) in overeenstemming met [de Digipolis requirements](https://github.com/digipolisantwerpdocumentation/api-requirements#datums-en-timestamps) en [het standaard Elasticsearch format](https://www.elastic.co/blog/considerations-for-timestamps-in-centralized-logging-platforms). De timestamp moet meegestuurd worden vanuit de applicatie uit nauwkeurigheidsoverwegingen. De logging stack kan latency introduceren.
 * *Type* wordt meegegeven bij elk soort log om later in de pipeline eventuele splitsingen te kunnen maken op index en in geval van privacy logs personendata te verwijderen.
-* *Het correlation object* wordt meegegeven om logs over de verschillende services heen te correleren. Formaat en inhoud van het correlation object zoals [voor Digipolis gedefinieerd](https://github.com/digipolisantwerpdocumentation/api-design-and-patterns/blob/master/patterns/correlation.md).
+* *Het correlation object* wordt meegegeven om transacties over de verschillende services heen te correleren. Formaat en inhoud van het correlation object zoals [voor Digipolis gedefinieerd](https://github.com/digipolisantwerpdocumentation/api-design-and-patterns/blob/master/patterns/correlation.md). Als output voor logs is enkel het correlationId uit het correlation object voldoende.
 * log *level*s worden meegegeven om eenvoudig te kunnen filteren en prioriteren (bijvoorbeeld alerts).
 
 ### Log levels
