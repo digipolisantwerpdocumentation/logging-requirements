@@ -19,21 +19,26 @@
 | ------ | -------------------- | ---------- | ------------------------- |
 | 1.0    | Quinten Scheppermans | 18/05/2020 | Release                   |
 | 1.1    | Quinten Scheppermans | 08/06/2020 | Aanpassingen logstructuur |
+| 1.2    | Quinten Scheppermans | 11/03/2021 | Sync ACPaaS ITD           |
 
 ## Context
 
 Dit document bevat de richtlijnen voor het gebruik van de Logging Engine bij Digipolis Antwerpen.
-Het focust enkel op de meest recente manier van loggen, die automatisch van toepassing is op elke containerized applicatie draaiende op [Openshift](https://www.openshift.com/) of [Platform 9](https://platform9.com/). De documentatie richt zich voornamelijk op developers, die custom applicaties in [NodeJS](https://nodejs.org/en/) en [.NET](https://dotnet.microsoft.com/) ontwikkelen. Als developer vind je er een antwoord op Architectuur je moet loggen, wat je moet loggen, waar je moet loggen en wanneer je moet loggen.
+Het focust enkel op de meest recente manier van loggen, die automatisch van toepassing is op elke containerized applicatie draaiende op [Openshift](https://www.openshift.com/) of [Platform 9](https://platform9.com/). De documentatie richt zich voornamelijk op developers, die custom applicaties in [NodeJS](https://nodejs.org/en/), [.NET](https://dotnet.microsoft.com/) en [Python](https://www.python.org/) ontwikkelen. Als developer vind je er een antwoord op architectuur, wat je moet loggen, waar je moet loggen en wanneer je moet loggen.
 
 ## Architectuur
 
 <img src="images/architectuur.png" width="75%" />
 
-Alle containers in onze **Openshift** Kubernetes clusters en via **Platform 9** opgezette Kubernetes clusters (MyACPAAS) produceren logs naar **stdout**. Deze logs worden via de default Docker JSON file logging driver opgepikt door **[Fluentbit](https://fluentbit.io/)**. Fluentbit is als DaemonSet gedeployed. Dit wil zeggen dat elke fysieke node in de cluster een kopie van de Fluentbit pod runt. In de config van Fluentbit worden de logs gefilterd, geparset en dan weggeschreven via een friendly url. De **F5** vertaalt deze url in het onderliggende ECE endpoint voor de juiste omgeving.
+Alle containers in onze **Openshift** Kubernetes clusters en via **Platform 9** opgezette Kubernetes clusters produceren logs naar **stdout**. Deze logs worden via de default Docker JSON file logging driver opgepikt door **[Fluentbit](https://fluentbit.io/)**. Fluentbit is als DaemonSet gedeployed. Dit wil zeggen dat elke fysieke node in de cluster een kopie van de Fluentbit pod runt. In de config van Fluentbit worden de logs gefilterd, geparset en dan weggeschreven via een friendly url. De **F5** vertaalt deze url in het onderliggende ECE endpoint voor de juiste omgeving.
 
 ## Hoe moet mijn applicatie loggen [WIP]
 
+Voor 3 talen wordt er een standaard package voorzien (Nuget, NPM,...) dat eenvoudig geïnstrumenteerd kan worden of zelfs standaard in de starter-kit aanwezig is.
 
+* [.NET](https://github.com/digipolisantwerp/generator-dgp-api-aspnetcore_yeoman/pull/28) - Changes needed
+* NodeJS - Implementation ongoing
+* Python - Implementation ongoing
 
 ## Wat moet mijn applicatie loggen
 
@@ -49,7 +54,7 @@ Technische informatie wordt gelogd om te helpen bij het identificeren van proble
 - **[Database queries]** Hoewel een database query vaak verscholen is achter een API CRUD call of getriggerd wordt door een event kan loggen toch helpen bij het onderzoeken van meer low-level problemen. Zoals de vertaling van abstracte interface naar SQL statement.
 - [**Debug**] Een developer draait een applicatie in debug mode en produceert zeer fine-grained informatie over de veranderende staat van de applicatie.
 
-Er is een veel hogere nood aan verbositeit, de structuur is moeilijker om vast te leggen en de levensduur is eerder kort. Denk in dagen, maximum weken. Het is dus aan te raden om deze informatie naar een andere index te loggen. Bepaalde zaken zijn ook niet wenselijk in productie (bijvoorbeeld debug informatie).
+Er is een veel hogere nood aan verbositeit, de structuur is moeilijker om vast te leggen en de levensduur is eerder kort. Denk in dagen, maximum weken. Bepaalde zaken zijn ook niet wenselijk in productie (bijvoorbeeld debug informatie).
 
 ### Functionele/Business informatie
 
@@ -72,14 +77,14 @@ Structuur verschilt per onderdeel, maar bevat enkele gemeenschappelijke elemente
 ```json
 {
     "timestamp": "2020-05-29T08:09:34.539Z",
-    "type": "application/technical/privacy",
+    "type": ["application", "technical", "privacy"],
     "correlationId": "d80db7ea-fe4c-4df5-afe1-1b675e19921f",
     "level": "DEBUG/INFO/WARN/ERROR/FATAL/TRACE"
 }
 ```
 
 * *Timestamp* ([RFC3339](https://tools.ietf.org/html/rfc3339)) in overeenstemming met [de Digipolis requirements](https://github.com/digipolisantwerpdocumentation/api-requirements#datums-en-timestamps) en [het standaard Elasticsearch format](https://www.elastic.co/blog/considerations-for-timestamps-in-centralized-logging-platforms). De timestamp moet meegestuurd worden vanuit de applicatie uit nauwkeurigheidsoverwegingen. De logging stack kan latency introduceren.
-* *Type* wordt meegegeven bij elk soort log om later in de pipeline eventuele splitsingen te kunnen maken op index en in geval van privacy logs personendata te verwijderen.
+* *Type* wordt meegegeven bij elk soort log om later in de pipeline eventuele splitsingen te kunnen maken op index en in geval van privacy logs personendata te verwijderen. Type is een array, meerdere opties zijn mogelijk.
 * *Het correlation object* wordt meegegeven om transacties over de verschillende services heen te correleren. Formaat en inhoud van het correlation object zoals [voor Digipolis gedefinieerd](https://github.com/digipolisantwerpdocumentation/api-design-and-patterns/blob/master/patterns/correlation.md). Als output voor logs is enkel het correlationId uit het correlation object voldoende.
 * log *level*s worden meegegeven om eenvoudig te kunnen filteren en prioriteren (bijvoorbeeld alerts).
 
@@ -117,11 +122,15 @@ Applicaties loggen naar **stdout**. Hier eindigt de verantwoordelijkheid van de 
 
 ## Wanneer moet mijn applicatie loggen
 
-De strategie voor wanneer een applicatie logs moet produceren is eenvoudig: **zo snel mogelijk**. Concreet betekent dit dat een gebeurtenis in het systeem gelogd moet worden zodra ze geïnitieerd is. Er hoeft niet eerst gewacht te worden tot de gebeurtenis voltrokken is. In een sterk gedistribueerd systeem is het perfect mogelijk dat één gebeurtenis, bijvoorbeeld een API call, een hele keten aan nieuwe gebeurtenissen ontketent voor een antwoord geformuleerd kan worden. Een **fictief** voorbeeld ter illustratie:
+De strategie voor wanneer een applicatie logs moet produceren is eenvoudig: **zo snel mogelijk**. Concreet betekent dit dat een gebeurtenis in het systeem gelogd moet worden zodra ze geïnitieerd is. Er hoeft niet eerst gewacht te worden tot de gebeurtenis voltrokken is. In een sterk gedistribueerd systeem is het perfect mogelijk dat één gebeurtenis een hele keten aan nieuwe gebeurtenissen ontketent voor een antwoord geformuleerd kan worden.
 
-<img src="images/transactie.png" alt="transactie" width="75%" />
+**Als uitzondering op deze regel** noemen we de API call. Het lijkt meer intuïtief om request en response in één log te verzamelen en bovendien verlaagt dit de load op het systeem.
 
-Een NodeJS service publisht een event op een Kafka topic [1]. De service **logt** dit naar stdout geformatteerd in JSON inclusief [correlation](https://github.com/digipolisantwerpdocumentation/api-design-and-patterns/blob/master/patterns/correlation.md), timestap en andere metadata. Een 2e NodeJS service, gesubscribed op hetzelfde topic consumeert het event [2] en **logt** dit onmiddelijk. Achterliggend triggert dit nieuwe acties. De 2e NodeJS service kopieert het correlation object en stuurt dit mee in een synchrone REST API call [3]. Stilzwijgend wordt dit object ook in alle hieropvolgende stappen do Het versturen van de call wordt **gelogd**. Als vorm van erkenning dat het request correct ontvangen zonder vervorming of blockage (bijvoorbeeld door netwerk, ESB, gateway, loadbalancer,...) **logt** de .NET core service het binnenkomende request. De .NET core service **logt** vervolgens het uitvoeren van een SQL statement op een PostgresQL database [4] en **logt** ook het resultaat van de query [5]. De response [6] wordt **gelogd** bij het versturen vanuit de .NET core service en wordt ook **gelogd** bij het ontvangen door de NodeJS service. De NodeJS service publisht een event op een topic verschillend van het eerste [7], deze actie wordt **gelogd**. De NodeJS service waarbij de transactie begon ten slotte, consumeert het event [8] en **logt** een laatste keer.
+Een **fictief** voorbeeld ter illustratie:
 
-Het resultaat voor deze transactie is totale observeerbaarheid in de vorm van ***10*** logs, die een makkelijk herafspeelbare historiek van gebeurtenissen in het systeem weergeven.
+<img src="images/transactie-request-response-samen.png" alt="transactie" width="75%" />
+
+Een NodeJS service publisht een event op een Kafka topic [1]. De service **logt** dit naar stdout geformatteerd in JSON inclusief [correlation](https://github.com/digipolisantwerpdocumentation/api-design-and-patterns/blob/master/patterns/correlation.md), timestamp en andere metadata. Een 2e NodeJS service, gesubscribed op hetzelfde topic, consumeert het event [2] en **logt** dit onmiddelijk. Achterliggend triggert dit nieuwe acties. De 2e NodeJS service kopieert het correlation object en stuurt dit mee in een synchrone REST API call. Stilzwijgend wordt dit object ook in alle hieropvolgende stappen doorgestuurd. Het versturen van de call wordt nog niet **gelogd**, eerst wordt er gewacht op de response [4]. Als vorm van erkenning dat het request correct ontvangen zonder vervorming of blockage (bijvoorbeeld door netwerk, ESB, gateway, loadbalancer,...) **logt** de .NET core service het binnenkomende request. De .NET core service **logt** vervolgens het uitvoeren en resultaat van een SQL statement op een PostgresQL database [3]. De NodeJS service publisht een event op een topic verschillend van het eerste [5], deze actie wordt **gelogd**. De NodeJS service waarbij de transactie begon ten slotte, consumeert het event [6] en **logt** een laatste keer.
+
+Het resultaat voor deze transactie is totale observeerbaarheid in de vorm van **6** logs, die een makkelijk herafspeelbare historiek van gebeurtenissen in het systeem weergeven.
 
