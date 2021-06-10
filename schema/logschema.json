@@ -63,7 +63,6 @@
             "required": [
                 "host",
                 "path",
-                "protocol",
                 "method"
             ],
             "properties": {
@@ -81,12 +80,9 @@
                 "payload": {
                     "ref": "#/$defs/payload"
                 },
-                "protocol": {
-                    "ref": "#/$defs/protocol"
-                },
                 "method": {
                     "type": "string",
-                    "enum": ["GET", "PUT", "PATCH", "POST", "DELETE"],
+                    "enum": ["GET", "PUT", "PATCH", "POST", "DELETE", "HEAD", "CONNECT", "OPTIONS", "TRACE"],
                     "description": "Used HTTP method."
                 }
             }
