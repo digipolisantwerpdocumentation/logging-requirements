@@ -15,11 +15,12 @@
 
 ## Document historiek
 
-| Versie | Auteur               | Datum      | Commit                    |
-| ------ | -------------------- | ---------- | ------------------------- |
-| 1.0    | Quinten Scheppermans | 18/05/2020 | Release                   |
-| 1.1    | Quinten Scheppermans | 08/06/2020 | Aanpassingen logstructuur |
-| 1.2    | Quinten Scheppermans | 11/03/2021 | Sync ACPaaS ITD           |
+| Versie | Auteur               | Datum      | Commit                     |
+| ------ | -------------------- | ---------- | -------------------------- |
+| 1.0    | Quinten Scheppermans | 18/05/2020 | Release                    |
+| 1.1    | Quinten Scheppermans | 08/06/2020 | Aanpassingen logstructuur  |
+| 1.2    | Quinten Scheppermans | 11/03/2021 | Sync ACPaaS ITD            |
+| 1.3    | Quinten Scheppermans | 10/08/2021 | Technische pipeline update |
 
 ## Context
 
@@ -30,7 +31,7 @@ Het focust enkel op de meest recente manier van loggen, die automatisch van toep
 
 <img src="images/architectuur.png" width="75%" />
 
-Alle containers in onze **Openshift** Kubernetes clusters en via **Platform 9** opgezette Kubernetes clusters produceren logs naar **stdout**. Deze logs worden via de default Docker JSON file logging driver opgepikt door **[Fluentbit](https://fluentbit.io/)**. Fluentbit is als DaemonSet gedeployed. Dit wil zeggen dat elke fysieke node in de cluster een kopie van de Fluentbit pod runt. In de config van Fluentbit worden de logs gefilterd, geparset en dan weggeschreven via een friendly url. De **F5** vertaalt deze url in het onderliggende ECE endpoint voor de juiste omgeving.
+Alle containers in onze **Openshift** Kubernetes clusters en via **Platform 9** opgezette Kubernetes clusters produceren logs naar **stdout**. Deze logs worden via de default Docker JSON file logging driver opgepikt door **[Fluentbit](https://fluentbit.io/)**. Fluentbit is als DaemonSet gedeployed. Dit wil zeggen dat elke fysieke node in de cluster een kopie van de Fluentbit pod runt. In de config van Fluentbit worden de logs gefilterd, geparset en dan weggeschreven naar een **Kafka** topic. Kafka dient als buffer om zowel Fluentbit als ECE meer ademruimte te geven. De meer complexe logica wordt uit Fluentbit gehaald en in Logstash gestoken. **Logstash** haalt op zijn eigen tempo de logs uit Kafka en stuurt deze door naar de juiste index in **ECE**.
 
 ## Hoe moet mijn applicatie loggen [WIP]
 
