@@ -16,7 +16,6 @@
       	"host": "http://www.api.com",
     	"path": "/resource/id?requestParam=value&requestParam2=value",
     	"payload": "{ ... }",
-    	"protocol": "HTTP",
     	"method": "POST",     
     },
     "response": {

@@ -15,12 +15,13 @@
 
 ## Document historiek
 
-| Versie | Auteur               | Datum      | Commit                     |
-| ------ | -------------------- | ---------- | -------------------------- |
-| 1.0    | Quinten Scheppermans | 18/05/2020 | Release                    |
-| 1.1    | Quinten Scheppermans | 08/06/2020 | Aanpassingen logstructuur  |
-| 1.2    | Quinten Scheppermans | 11/03/2021 | Sync ACPaaS ITD            |
-| 1.3    | Quinten Scheppermans | 10/08/2021 | Technische pipeline update |
+| Versie | Auteur               | Datum      | Commit                                      |
+| ------ | -------------------- | ---------- | ------------------------------------------- |
+| 1.0    | Quinten Scheppermans | 18/05/2020 | Release                                     |
+| 1.1    | Quinten Scheppermans | 08/06/2020 | Aanpassingen logstructuur                   |
+| 1.2    | Quinten Scheppermans | 11/03/2021 | Sync ACPaaS ITD                             |
+| 1.3    | Quinten Scheppermans | 10/08/2021 | Technische pipeline update                  |
+| 1.4    | Quinten Scheppermans | 10/08/2021 | Stricter schema en uitbreiding documentatie |
 
 ## Context
 
@@ -70,6 +71,9 @@ Functionele logs zijn nuttig bij het debuggen van functionele problemen, analyse
 ### Structuur
 
 Structuur verschilt per onderdeel, maar bevat enkele gemeenschappelijke elementen. Elke log is een valid **JSON** object.
+
+Lees [**hier**](schema/README.md) meer over het **schema** waaraan de log moet voldoen!
+Lees [**hier**](kibana/README.md) meer over het interpreteren van de resultaten in Kibana!
 
 > Uitbreidingen op de basisstructuur voor **[api-calls](structure/api-call.md), [events](structure/event.md)** en **[technische logs](structure/technical.md)**.
 
