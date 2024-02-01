@@ -36,11 +36,10 @@ Alle containers in onze **Openshift** Kubernetes clusters en via **Platform 9** 
 
 ## Hoe moet mijn applicatie loggen [WIP]
 
-Voor 3 talen wordt er een standaard package voorzien (Nuget, NPM,...) dat eenvoudig geïnstrumenteerd kan worden of zelfs standaard in de starter-kit aanwezig is.
+Voor 2 talen wordt er een standaard package voorzien (Nuget, NPM,...) dat eenvoudig geïnstrumenteerd kan worden of zelfs standaard in de starter-kit aanwezig is.
 
-* [.NET](https://github.com/digipolisantwerp/generator-dgp-api-aspnetcore_yeoman/pull/28) - Changes needed
-* NodeJS - Implementation ongoing
-* Python - Implementation ongoing
+* [.NET](https://github.com/digipolisantwerp/generator-dgp-api-aspnetcore_yeoman/pull/28) - .NET6 upgrade to 8 needed.
+* [NodeJS Log Module](https://github.com/digipolisantwerp/log_module_nodejs) & [NodeJS Request Log Module](https://github.com/digipolisantwerp/request_log_module_nodejs) - Implementation OK
 
 ## Wat moet mijn applicatie loggen
 
