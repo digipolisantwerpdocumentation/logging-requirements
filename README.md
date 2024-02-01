@@ -22,6 +22,7 @@
 | 1.2    | Quinten Scheppermans | 11/03/2021 | Sync ACPaaS ITD                             |
 | 1.3    | Quinten Scheppermans | 10/08/2021 | Technische pipeline update                  |
 | 1.4    | Quinten Scheppermans | 10/08/2021 | Stricter schema en uitbreiding documentatie |
+| 1.5    | Quinten Scheppermans | 01/02/2024 | Toevoegen starterkit packages               |
 
 ## Context
 
